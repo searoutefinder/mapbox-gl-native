@@ -11,14 +11,16 @@
 
 namespace mbgl {
 namespace style {
-    
+
 class Filter {
 public:
     optional<std::shared_ptr<const expression::Expression>> expression;
-    
+    optional<mbgl::Value> filter;
     Filter() : expression() {}
     
-    Filter(expression::ParseResult _expression) : expression(std::move(*_expression)) {
+    Filter(expression::ParseResult _expression, optional<mbgl::Value> _filter = {})
+    : expression(std::move(*_expression)),
+     filter(std::move(_filter)){
         assert(!expression || *expression != nullptr);
     }
     
@@ -34,6 +36,16 @@ public:
     
     friend bool operator!=(const Filter& lhs, const Filter& rhs) {
         return !(lhs == rhs);
+    }
+    
+    mbgl::Value serialize() const {
+        if (filter) {
+            return *filter;
+        }
+        else if (expression) {
+            return (**expression).serialize();
+        }
+        return NullValue();
     }
 };
 
