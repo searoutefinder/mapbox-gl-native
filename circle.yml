@@ -153,6 +153,19 @@ step-library:
         command: make check-public-symbols
 
 
+  - &generate-maven-credentials
+      run:
+        name: Generate Maven credentials
+        shell: /bin/bash -euo pipefail
+        command: |
+          aws s3 cp s3://mapbox/android/signing-credentials/secring.gpg platform/android/MapboxGLAndroidSDK/secring.gpg
+          echo "NEXUS_USERNAME=$PUBLISH_NEXUS_USERNAME
+          NEXUS_PASSWORD=$PUBLISH_NEXUS_PASSWORD
+          signing.keyId=$SIGNING_KEYID
+          signing.password=$SIGNING_PASSWORD
+          signing.secretKeyRingFile=secring.gpg" >> platform/android/MapboxGLAndroidSDK/gradle.properties
+
+
   - &install-ios-packaging-dependencies
       run:
         name: Install iOS packaging dependencies
@@ -399,16 +412,7 @@ jobs:
       - *restore-cache
       - *restore-gradle-cache
       - *reset-ccache-stats
-      - run:
-          name: Generate Maven credentials
-          shell: /bin/bash -euo pipefail
-          command: |
-            aws s3 cp s3://mapbox/android/signing-credentials/secring.gpg platform/android/MapboxGLAndroidSDK/secring.gpg
-            echo "NEXUS_USERNAME=$PUBLISH_NEXUS_USERNAME
-            NEXUS_PASSWORD=$PUBLISH_NEXUS_PASSWORD
-            signing.keyId=$SIGNING_KEYID
-            signing.password=$SIGNING_PASSWORD
-            signing.secretKeyRingFile=secring.gpg" >> platform/android/MapboxGLAndroidSDK/gradle.properties
+      - *generate-maven-credentials
       - run:
           name: Build package
           command: make apackage
@@ -440,16 +444,7 @@ jobs:
       - *restore-cache
       - *restore-gradle-cache
       - *reset-ccache-stats
-      - run:
-          name: Generate Maven credentials
-          shell: /bin/bash -euo pipefail
-          command: |
-            aws s3 cp s3://mapbox/android/signing-credentials/secring.gpg platform/android/MapboxGLAndroidSDK/secring.gpg
-            echo "NEXUS_USERNAME=$PUBLISH_NEXUS_USERNAME
-            NEXUS_PASSWORD=$PUBLISH_NEXUS_PASSWORD
-            signing.keyId=$SIGNING_KEYID
-            signing.password=$SIGNING_PASSWORD
-            signing.secretKeyRingFile=secring.gpg" >> platform/android/MapboxGLAndroidSDK/gradle.properties
+      - *generate-maven-credentials
       - run:
           name: Build package
           command: make apackage
@@ -489,16 +484,7 @@ jobs:
       - *restore-cache
       - *restore-gradle-cache
       - *reset-ccache-stats
-      - run:
-          name: Generate Maven credentials
-          shell: /bin/bash -euo pipefail
-          command: |
-            aws s3 cp s3://mapbox/android/signing-credentials/secring.gpg platform/android/MapboxGLAndroidSDK/secring.gpg
-            echo "NEXUS_USERNAME=$PUBLISH_NEXUS_USERNAME
-            NEXUS_PASSWORD=$PUBLISH_NEXUS_PASSWORD
-            signing.keyId=$SIGNING_KEYID
-            signing.password=$SIGNING_PASSWORD
-            signing.secretKeyRingFile=secring.gpg" >> platform/android/MapboxGLAndroidSDK/gradle.properties
+      - *generate-maven-credentials
       - run:
           name: Update version name
           command: sed -i -e "s/^VERSION_NAME=.*/VERSION_NAME=${CIRCLE_TAG:9}/" platform/android/MapboxGLAndroidSDK/gradle.properties
